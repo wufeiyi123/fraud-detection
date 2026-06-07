@@ -1,0 +1,2440 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>财务舞弊风险识别智能体分析系统</title>
+<style>
+/* ═══════════════════════════════════════════════════════════════
+   CSS Variables
+   ═══════════════════════════════════════════════════════════════ */
+:root {
+  --bg-primary: #0f172a;
+  --bg-secondary: #1e293b;
+  --bg-tertiary: #334155;
+  --bg-card: #1e293b;
+  --bg-card-hover: #263548;
+  --accent: #3b82f6;
+  --accent-light: #60a5fa;
+  --accent-dark: #2563eb;
+  --success: #22c55e;
+  --success-bg: rgba(34,197,94,0.12);
+  --warning: #f59e0b;
+  --warning-bg: rgba(245,158,11,0.12);
+  --danger: #ef4444;
+  --danger-bg: rgba(239,68,68,0.12);
+  --orange: #f97316;
+  --orange-bg: rgba(249,115,22,0.12);
+  --text-primary: #e2e8f0;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  --border: #334155;
+  --border-light: #475569;
+  --shadow: 0 4px 24px rgba(0,0,0,0.3);
+  --radius: 12px;
+  --radius-sm: 8px;
+  --radius-lg: 16px;
+  --transition: all 0.3s cubic-bezier(0.4,0,0.2,1);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   Reset & Base
+   ═══════════════════════════════════════════════════════════════ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  line-height: 1.6;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+a { color: var(--accent-light); text-decoration: none; }
+a:hover { color: var(--accent); }
+
+/* ═══════════════════════════════════════════════════════════════
+   Scrollbar
+   ═══════════════════════════════════════════════════════════════ */
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: var(--bg-primary); }
+::-webkit-scrollbar-thumb { background: var(--bg-tertiary); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: var(--border-light); }
+
+/* ═══════════════════════════════════════════════════════════════
+   Navigation
+   ═══════════════════════════════════════════════════════════════ */
+.navbar {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(15,23,42,0.85);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+  padding: 0 24px;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.navbar .logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.navbar .logo-icon {
+  width: 36px;
+  height: 36px;
+  background: linear-gradient(135deg, var(--accent), #8b5cf6);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  font-weight: bold;
+  color: #fff;
+}
+.navbar .logo-text h1 {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1.2;
+}
+.navbar .logo-text p {
+  font-size: 11px;
+  color: var(--text-muted);
+  line-height: 1.2;
+}
+.navbar .status-dot {
+  width: 8px; height: 8px;
+  background: var(--success);
+  border-radius: 50%;
+  display: inline-block;
+  margin-right: 6px;
+  animation: pulse-dot 2s infinite;
+}
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   Hero / Search
+   ═══════════════════════════════════════════════════════════════ */
+.hero {
+  padding: 60px 24px 40px;
+  text-align: center;
+  position: relative;
+}
+.hero::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle at 50% 50%, rgba(59,130,246,0.08) 0%, transparent 50%);
+  pointer-events: none;
+}
+.hero h2 {
+  font-size: 28px;
+  font-weight: 700;
+  margin-bottom: 8px;
+  background: linear-gradient(135deg, var(--text-primary), var(--accent-light));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.hero .subtitle {
+  color: var(--text-secondary);
+  font-size: 14px;
+  margin-bottom: 36px;
+}
+
+.search-container {
+  max-width: 680px;
+  margin: 0 auto;
+  position: relative;
+}
+.search-row {
+  display: flex;
+  gap: 12px;
+  align-items: stretch;
+}
+.search-box {
+  flex: 1;
+  position: relative;
+}
+.search-box input {
+  width: 100%;
+  height: 52px;
+  padding: 0 48px 0 20px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text-primary);
+  font-size: 15px;
+  outline: none;
+  transition: var(--transition);
+}
+.search-box input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(59,130,246,0.15);
+}
+.search-box input::placeholder {
+  color: var(--text-muted);
+}
+.search-box .search-icon {
+  position: absolute;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-muted);
+  font-size: 18px;
+  pointer-events: none;
+}
+
+.year-select {
+  width: 140px;
+  height: 52px;
+  padding: 0 16px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text-primary);
+  font-size: 15px;
+  outline: none;
+  cursor: pointer;
+  transition: var(--transition);
+  -webkit-appearance: none;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+}
+.year-select:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(59,130,246,0.15);
+}
+.year-select option {
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+}
+
+.btn-analyze {
+  height: 52px;
+  padding: 0 32px;
+  background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+  border: none;
+  border-radius: var(--radius);
+  color: #fff;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.btn-analyze:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(59,130,246,0.4);
+}
+.btn-analyze:active { transform: translateY(0); }
+.btn-analyze:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* Search Dropdown */
+.search-dropdown {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  max-height: 320px;
+  overflow-y: auto;
+  z-index: 50;
+  display: none;
+}
+.search-dropdown.active { display: block; }
+.search-dropdown .dd-item {
+  padding: 12px 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  transition: background 0.15s;
+  border-bottom: 1px solid rgba(51,65,85,0.5);
+}
+.search-dropdown .dd-item:last-child { border-bottom: none; }
+.search-dropdown .dd-item:hover { background: var(--bg-card-hover); }
+.search-dropdown .dd-item .code {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--accent-light);
+  min-width: 70px;
+}
+.search-dropdown .dd-item .name {
+  font-size: 14px;
+  color: var(--text-primary);
+  flex: 1;
+}
+.search-dropdown .dd-item .industry {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+.search-dropdown .dd-empty {
+  padding: 20px;
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 14px;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   Main Content
+   ═══════════════════════════════════════════════════════════════ */
+.main-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px 60px;
+}
+
+/* Section */
+.section {
+  margin-bottom: 32px;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+.section.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+.section-header .icon {
+  width: 32px;
+  height: 32px;
+  background: linear-gradient(135deg, var(--accent), #8b5cf6);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+}
+.section-header h3 {
+  font-size: 18px;
+  font-weight: 600;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   Cards
+   ═══════════════════════════════════════════════════════════════ */
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+  transition: var(--transition);
+}
+.card:hover {
+  border-color: var(--border-light);
+  box-shadow: var(--shadow);
+}
+
+/* Company Info Header */
+.company-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+  padding: 24px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  margin-bottom: 20px;
+}
+.company-header .info {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.company-header .company-name {
+  font-size: 22px;
+  font-weight: 700;
+}
+.company-header .company-code {
+  font-size: 14px;
+  color: var(--accent-light);
+  font-weight: 600;
+}
+.company-header .meta-tags {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.company-header .tag {
+  padding: 4px 12px;
+  background: rgba(59,130,246,0.1);
+  border: 1px solid rgba(59,130,246,0.2);
+  border-radius: 20px;
+  font-size: 12px;
+  color: var(--accent-light);
+}
+
+/* Metric Grid */
+.metric-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 12px;
+}
+.metric-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 16px;
+  transition: var(--transition);
+  position: relative;
+  overflow: hidden;
+}
+.metric-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 3px;
+  height: 100%;
+  background: var(--accent);
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+.metric-card:hover::before { opacity: 1; }
+.metric-card:hover {
+  border-color: var(--border-light);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+.metric-card .label {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.metric-card .value {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text-primary);
+  word-break: break-all;
+}
+.metric-card .value.na {
+  font-size: 14px;
+  color: var(--text-muted);
+  font-weight: 400;
+}
+
+/* Category Metric Tabs */
+.cat-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
+  padding: 4px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+}
+.cat-tab {
+  flex: 1;
+  min-width: 80px;
+  padding: 10px 12px;
+  border: none;
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: var(--transition);
+  text-align: center;
+  white-space: nowrap;
+}
+.cat-tab:hover {
+  color: var(--text-primary);
+  background: rgba(255,255,255,0.05);
+}
+.cat-tab.active {
+  color: var(--text-primary);
+  background: var(--accent);
+  box-shadow: 0 2px 8px rgba(99,102,241,0.3);
+}
+.cat-metric-grid {
+  display: none;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 12px;
+  animation: fadeIn 0.3s ease;
+}
+.cat-metric-grid.active { display: grid; }
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   Workpaper Overview
+   ═══════════════════════════════════════════════════════════════ */
+.wp-overview {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 16px;
+  grid-auto-rows: 1fr;
+}
+.wp-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+}
+.wp-card.wp-card-col-2 { grid-column: span 2; }
+.wp-card.wp-card-col-3 { grid-column: span 3; }
+.wp-card h4 {
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin-bottom: 10px;
+  font-weight: 500;
+}
+
+/* ML Score Display */
+.ml-score-display {
+  text-align: center;
+  padding: 24px;
+}
+.ml-score-display .score-value {
+  font-size: 48px;
+  font-weight: 800;
+  line-height: 1;
+  margin-bottom: 8px;
+}
+.ml-score-display .score-label {
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin-bottom: 16px;
+}
+.ml-score-display .risk-badge {
+  display: inline-block;
+  padding: 6px 20px;
+  border-radius: 20px;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+/* Rule Stats */
+.rule-stats {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+.rule-stats .big-num {
+  font-size: 36px;
+  font-weight: 800;
+  color: var(--accent-light);
+}
+.rule-stats .big-label {
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+.weight-bars {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
+.weight-bar-item {
+  flex: 1;
+  text-align: center;
+}
+.weight-bar-item .bar {
+  height: 6px;
+  border-radius: 3px;
+  margin-bottom: 6px;
+}
+.weight-bar-item .count {
+  font-size: 14px;
+  font-weight: 600;
+}
+.weight-bar-item .lbl {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+/* Category Tags */
+.category-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.category-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  background: rgba(30,41,59,0.6);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+}
+.category-item .cat-name {
+  font-size: 14px;
+  font-weight: 500;
+}
+.category-item .cat-count {
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+/* Fraud Triangle */
+.triangle-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+.triangle-item {
+  text-align: center;
+  padding: 10px 8px;
+  background: rgba(30,41,59,0.6);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+}
+.triangle-item .t-label {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-bottom: 2px;
+}
+.triangle-item .t-level {
+  font-size: 15px;
+  font-weight: 700;
+}
+.triangle-item .t-signals {
+  font-size: 11px;
+  color: var(--text-secondary);
+  margin-top: 4px;
+}
+.triangle-item .t-desc {
+  font-size: 10px;
+  color: var(--text-muted);
+  margin: 2px 0 4px;
+  line-height: 1.3;
+  font-style: italic;
+}
+.triangle-item .t-signal-item {
+  font-size: 10px;
+  color: var(--text-secondary);
+  text-align: left;
+  padding: 1px 0;
+  margin: 1px 0;
+  border-top: 1px solid rgba(255,255,255,0.04);
+}
+.triangle-item.level-high { border-color: var(--danger); background: rgba(239,68,68,0.08); }
+.triangle-item.level-medium { border-color: var(--warning); background: rgba(245,158,11,0.08); }
+.triangle-item.level-low { border-color: var(--success); background: rgba(34,197,94,0.05); }
+.triangle-theory-note {
+  grid-column: 1 / -1;
+  font-size: 10px;
+  color: var(--text-muted);
+  padding: 6px 10px;
+  background: rgba(30,41,59,0.6);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  line-height: 1.5;
+}
+
+/* Category hit highlight */
+.category-item.hit {
+  border-color: rgba(239,68,68,0.3);
+  background: rgba(239,68,68,0.06);
+}
+.category-item.hit .cat-count {
+  color: var(--danger);
+  font-weight: 600;
+}
+.category-item.hit .cat-name {
+  color: var(--text-primary);
+}
+.category-item.no-hit { opacity: 0.6; }
+.category-item.no-hit .cat-count {
+  color: var(--text-muted);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   Progress / Steps Animation
+   ═══════════════════════════════════════════════════════════════ */
+.progress-panel {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 32px;
+  margin-bottom: 32px;
+  display: none;
+}
+.progress-panel.active { display: block; }
+.progress-panel h3 {
+  text-align: center;
+  font-size: 18px;
+  margin-bottom: 28px;
+  color: var(--text-secondary);
+}
+.steps {
+  max-width: 500px;
+  margin: 0 auto;
+}
+.step-item {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--border);
+  opacity: 0.4;
+  transition: var(--transition);
+}
+.step-item:last-child { border-bottom: none; }
+.step-item.active { opacity: 1; }
+.step-item.done { opacity: 0.7; }
+.step-item .step-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  flex-shrink: 0;
+  background: var(--bg-tertiary);
+  color: var(--text-muted);
+  transition: var(--transition);
+}
+.step-item.active .step-icon {
+  background: var(--accent);
+  color: #fff;
+  animation: step-pulse 1.5s infinite;
+}
+.step-item.done .step-icon {
+  background: var(--success);
+  color: #fff;
+}
+@keyframes step-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(59,130,246,0.4); }
+  50% { box-shadow: 0 0 0 8px rgba(59,130,246,0); }
+}
+.step-item .step-text {
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+.step-item.active .step-text { color: var(--text-primary); font-weight: 500; }
+.step-item.done .step-text { color: var(--success); }
+
+/* Spinner */
+.spinner {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(59,130,246,0.3);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin-left: 8px;
+  vertical-align: middle;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ═══════════════════════════════════════════════════════════════
+   Tabs
+   ═══════════════════════════════════════════════════════════════ */
+.tabs-container {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+.tabs-nav {
+  display: flex;
+  border-bottom: 1px solid var(--border);
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+.tabs-nav::-webkit-scrollbar { height: 0; }
+.tab-btn {
+  padding: 14px 20px;
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: var(--transition);
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.tab-btn:hover {
+  color: var(--text-primary);
+  background: rgba(59,130,246,0.05);
+}
+.tab-btn.active {
+  color: var(--accent-light);
+  border-bottom-color: var(--accent);
+  background: rgba(59,130,246,0.08);
+}
+.tab-content {
+  padding: 16px;
+  display: none;
+}
+.tab-content.active { display: block; }
+
+/* ═══════════════════════════════════════════════════════════════
+   Risk Level Badges
+   ═══════════════════════════════════════════════════════════════ */
+.risk-badge {
+  display: inline-block;
+  padding: 4px 14px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+}
+.risk-low { background: var(--success-bg); color: var(--success); border: 1px solid rgba(34,197,94,0.3); }
+.risk-medium { background: var(--warning-bg); color: var(--warning); border: 1px solid rgba(245,158,11,0.3); }
+.risk-medium-high { background: var(--orange-bg); color: var(--orange); border: 1px solid rgba(249,115,22,0.3); }
+.risk-high { background: var(--danger-bg); color: var(--danger); border: 1px solid rgba(239,68,68,0.3); }
+
+.risk-big {
+  display: inline-block;
+  padding: 10px 32px;
+  border-radius: 24px;
+  font-size: 24px;
+  font-weight: 800;
+  letter-spacing: 2px;
+}
+
+/* Strength badges */
+.strength-badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+}
+.strength-weak { background: var(--danger-bg); color: var(--danger); }
+.strength-mid { background: var(--warning-bg); color: var(--warning); }
+.strength-strong { background: var(--success-bg); color: var(--success); }
+.strength-none { background: rgba(100,116,139,0.15); color: var(--text-muted); }
+
+/* Priority badges */
+.priority-high { background: var(--danger-bg); color: var(--danger); border: 1px solid rgba(239,68,68,0.3); }
+.priority-medium { background: var(--warning-bg); color: var(--warning); border: 1px solid rgba(245,158,11,0.3); }
+.priority-low { background: var(--success-bg); color: var(--success); border: 1px solid rgba(34,197,94,0.3); }
+
+/* ═══════════════════════════════════════════════════════════════
+   Accusation / Defense / Verdict Cards
+   ═══════════════════════════════════════════════════════════════ */
+.result-card {
+  background: rgba(30,41,59,0.5);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px;
+  margin-bottom: 10px;
+  transition: var(--transition);
+}
+.result-card:hover {
+  border-color: var(--border-light);
+}
+.result-card .rc-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+.result-card .rc-id {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--accent-light);
+  background: rgba(59,130,246,0.1);
+  padding: 2px 10px;
+  border-radius: 10px;
+}
+.result-card .rc-title {
+  font-size: 15px;
+  font-weight: 600;
+  flex: 1;
+}
+.result-card .rc-body {
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.7;
+}
+.result-card .rc-body p {
+  margin-bottom: 8px;
+}
+.result-card .rc-body p:last-child { margin-bottom: 0; }
+.result-card .rc-body .field-label {
+  color: var(--text-muted);
+  font-size: 12px;
+  margin-right: 6px;
+}
+.result-card .rc-body .evidence-tag {
+  display: inline-block;
+  background: rgba(59,130,246,0.08);
+  border: 1px solid rgba(59,130,246,0.15);
+  padding: 1px 8px;
+  border-radius: 10px;
+  font-size: 12px;
+  color: var(--accent-light);
+  margin: 2px 4px 2px 0;
+}
+
+/* Defense reasons */
+.defense-reason {
+  background: rgba(30,41,59,0.4);
+  border-left: 3px solid var(--accent);
+  padding: 8px 12px;
+  margin: 6px 0;
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+}
+.defense-reason .dr-type {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--accent-light);
+  margin-bottom: 4px;
+}
+.defense-reason .dr-text {
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+.defense-reason .dr-evidence {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-top: 4px;
+  font-style: italic;
+}
+.defense-reason .dr-evidence.has-ev { color: var(--success); }
+.defense-reason .dr-evidence.no-ev { color: var(--warning); }
+
+/* Verdict items */
+.verdict-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px;
+  margin-bottom: 10px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+}
+.verdict-item.confirmed { background: var(--success-bg); border-color: rgba(34,197,94,0.2); }
+.verdict-item.rejected { background: var(--danger-bg); border-color: rgba(239,68,68,0.2); }
+.verdict-item.watchlist { background: var(--warning-bg); border-color: rgba(245,158,11,0.2); }
+.verdict-item .vi-icon {
+  font-size: 18px;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+.verdict-item .vi-content { flex: 1; }
+.verdict-item .vi-type {
+  font-size: 12px;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+.verdict-item .vi-text {
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+.verdict-item .vi-reason {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-top: 6px;
+}
+
+/* Evidence chain */
+.evidence-chain-item {
+  padding: 14px;
+  margin-bottom: 10px;
+  background: rgba(30,41,59,0.4);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+}
+.evidence-chain-item .ec-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.evidence-chain-item .ec-summary {
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+.evidence-chain-item .ec-rules {
+  margin-top: 8px;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+/* Summary text */
+.summary-text {
+  padding: 14px;
+  background: rgba(59,130,246,0.05);
+  border: 1px solid rgba(59,130,246,0.15);
+  border-radius: var(--radius);
+  font-size: 14px;
+  color: var(--text-primary);
+  line-height: 1.6;
+  margin-top: 10px;
+}
+
+/* Investment advice */
+.advice-section {
+  padding: 14px;
+  margin-bottom: 10px;
+  background: rgba(30,41,59,0.5);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+.advice-section h4 {
+  font-size: 15px;
+  font-weight: 600;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.advice-section ul {
+  list-style: none;
+  padding: 0;
+}
+.advice-section ul li {
+  padding: 8px 0;
+  padding-left: 20px;
+  position: relative;
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  border-bottom: 1px solid rgba(51,65,85,0.3);
+}
+.advice-section ul li:last-child { border-bottom: none; }
+.advice-section ul li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 14px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+}
+
+/* Overall risk summary */
+.overall-risk-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 10px;
+  margin-bottom: 12px;
+}
+.overall-risk-item {
+  text-align: center;
+  padding: 14px;
+  background: rgba(30,41,59,0.5);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+.overall-risk-item .or-label {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+}
+.overall-risk-item .or-value {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   Toast
+   ═══════════════════════════════════════════════════════════════ */
+.toast-container {
+  position: fixed;
+  top: 80px;
+  right: 24px;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.toast {
+  padding: 14px 20px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  font-size: 14px;
+  color: var(--text-primary);
+  max-width: 400px;
+  animation: toast-in 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.toast.toast-error { border-left: 4px solid var(--danger); }
+.toast.toast-success { border-left: 4px solid var(--success); }
+.toast.toast-info { border-left: 4px solid var(--accent); }
+.toast.toast-out { animation: toast-out 0.3s ease forwards; }
+@keyframes toast-in { from { opacity: 0; transform: translateX(40px); } to { opacity: 1; transform: translateX(0); } }
+@keyframes toast-out { from { opacity: 1; transform: translateX(0); } to { opacity: 0; transform: translateX(40px); } }
+
+/* ═══════════════════════════════════════════════════════════════
+   Skeleton
+   ═══════════════════════════════════════════════════════════════ */
+.skeleton {
+  background: linear-gradient(90deg, var(--bg-tertiary) 25%, rgba(51,65,85,0.5) 50%, var(--bg-tertiary) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 6px;
+}
+@keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+.skeleton-text { height: 14px; margin-bottom: 8px; }
+.skeleton-text.w-60 { width: 60%; }
+.skeleton-text.w-80 { width: 80%; }
+.skeleton-text.w-40 { width: 40%; }
+.skeleton-card {
+  height: 80px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   Responsive
+   ═══════════════════════════════════════════════════════════════ */
+@media (max-width: 768px) {
+  .hero h2 { font-size: 22px; }
+  .search-row { flex-direction: column; }
+  .year-select { width: 100%; }
+  .btn-analyze { width: 100%; justify-content: center; }
+  .company-header { flex-direction: column; align-items: flex-start; }
+  .metric-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
+  .wp-overview { grid-template-columns: 1fr; }
+  .wp-overview .wp-card-col-2,
+  .wp-overview .wp-card-col-3 { grid-column: span 1; }
+  .triangle-grid { grid-template-columns: 1fr; }
+  .overall-risk-grid { grid-template-columns: 1fr 1fr; }
+  .tabs-nav { gap: 0; }
+  .tab-btn { padding: 12px 14px; font-size: 13px; }
+  .tab-content { padding: 16px; }
+  .risk-big { font-size: 18px; padding: 8px 20px; }
+  .ml-score-display .score-value { font-size: 36px; }
+}
+
+@media (max-width: 480px) {
+  .navbar .logo-text h1 { font-size: 14px; }
+  .navbar .logo-text p { display: none; }
+  .metric-grid { grid-template-columns: 1fr 1fr; }
+  .overall-risk-grid { grid-template-columns: 1fr; }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   Utility
+   ═══════════════════════════════════════════════════════════════ */
+.text-success { color: var(--success); }
+.text-warning { color: var(--warning); }
+.text-danger { color: var(--danger); }
+.text-orange { color: var(--orange); }
+.text-muted { color: var(--text-muted); }
+.text-accent { color: var(--accent-light); }
+.text-sm { font-size: 13px; }
+.text-xs { font-size: 12px; }
+.mt-2 { margin-top: 8px; }
+.mt-4 { margin-top: 16px; }
+.mb-2 { margin-bottom: 8px; }
+.mb-4 { margin-bottom: 16px; }
+.fw-bold { font-weight: 700; }
+.flex-center { display: flex; align-items: center; justify-content: center; }
+.gap-2 { gap: 8px; }
+.gap-3 { gap: 12px; }
+.hidden { display: none !important; }
+
+/* Divider */
+.divider {
+  height: 1px;
+  background: var(--border);
+  margin: 16px 0;
+}
+
+/* Empty state */
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--text-muted);
+  position: relative;
+  z-index: 1;
+}
+.empty-state .empty-icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+  opacity: 0.3;
+}
+.empty-state p {
+  font-size: 15px;
+  margin-bottom: 4px;
+}
+
+/* Loading overlay */
+.loading-overlay {
+  position: relative;
+  min-height: 100px;
+}
+.loading-overlay::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(15,23,42,0.6);
+  border-radius: var(--radius);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     Navigation
+     ═══════════════════════════════════════════════════════════════ -->
+<nav class="navbar">
+  <div class="logo">
+    <div class="logo-icon">FR</div>
+    <div class="logo-text">
+      <h1>财务舞弊风险识别智能体分析系统</h1>
+      <p>基于指控-辩护-裁决三智能体协同分析</p>
+    </div>
+  </div>
+  <div style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text-muted);">
+    <span class="status-dot"></span>
+    <span id="apiStatus">API 就绪</span>
+  </div>
+</nav>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     Hero / Search
+     ═══════════════════════════════════════════════════════════════ -->
+<section class="hero">
+  <h2>输入股票代码或公司名称开始分析</h2>
+  <div class="search-container">
+    <div class="search-row">
+      <div class="search-box">
+        <input type="text" id="searchInput" placeholder="输入股票代码或公司名称，如 000651 或 格力电器" autocomplete="off">
+        <span class="search-icon">&#128269;</span>
+        <div class="search-dropdown" id="searchDropdown"></div>
+      </div>
+      <select class="year-select" id="yearSelect">
+        <option value="">选择年份</option>
+      </select>
+      <button class="btn-analyze" id="btnAnalyze" disabled>
+        <span>&#9654;</span> 开始分析
+      </button>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     Main Content
+     ═══════════════════════════════════════════════════════════════ -->
+<div class="main-content">
+
+  <!-- Empty State (default) -->
+  <div class="empty-state" id="emptyState">
+    <div class="empty-icon">&#128202;</div>
+    <p>请搜索并选择一只股票开始分析</p>
+    <p class="text-sm">支持输入股票代码或公司名称进行搜索</p>
+  </div>
+
+  <!-- Progress Panel -->
+  <div class="progress-panel" id="progressPanel">
+    <h3>分析进行中</h3>
+    <div class="steps">
+      <div class="step-item" id="step1">
+        <div class="step-icon">1</div>
+        <div class="step-text">生成工作底稿...</div>
+      </div>
+      <div class="step-item" id="step2">
+        <div class="step-icon">2</div>
+        <div class="step-text">指控智能体分析中...</div>
+      </div>
+      <div class="step-item" id="step3">
+        <div class="step-icon">3</div>
+        <div class="step-text">辩护智能体分析中...</div>
+      </div>
+      <div class="step-item" id="step4">
+        <div class="step-icon">4</div>
+        <div class="step-text">裁决智能体分析中...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section: Company Basic Info -->
+  <div class="section" id="sectionBasicInfo" style="display:none;">
+    <div class="section-header">
+      <div class="icon">&#127970;</div>
+      <h3>公司基本信息</h3>
+    </div>
+    <div id="companyHeader"></div>
+    <div class="cat-tabs" id="catTabs"></div>
+    <div id="catMetrics"></div>
+  </div>
+
+  <!-- Section: Workpaper Overview -->
+  <div class="section" id="sectionWorkpaper" style="display:none;">
+    <div class="section-header">
+      <div class="icon">&#128203;</div>
+      <h3>工作底稿概览</h3>
+    </div>
+    <div class="wp-overview" id="wpOverview"></div>
+  </div>
+
+  <!-- Section: Three-Agent Analysis -->
+  <div class="section" id="sectionAnalysis" style="display:none;">
+    <div class="section-header">
+      <div class="icon">&#129302;</div>
+      <h3>三智能体分析结果</h3>
+    </div>
+    <div class="tabs-container">
+      <div class="tabs-nav" id="tabsNav">
+        <button class="tab-btn active" data-tab="tabProsecution">&#9878;&#65039; 指控智能体</button>
+        <button class="tab-btn" data-tab="tabDefense">&#128737;&#65039; 辩护智能体</button>
+        <button class="tab-btn" data-tab="tabVerdict">&#127942; 裁决智能体</button>
+      </div>
+
+      <!-- Tab: Prosecution -->
+      <div class="tab-content active" id="tabProsecution"></div>
+
+      <!-- Tab: Defense -->
+      <div class="tab-content" id="tabDefense"></div>
+
+      <!-- Tab: Verdict -->
+      <div class="tab-content" id="tabVerdict"></div>
+    </div>
+  </div>
+
+  <!-- Section: Overall Conclusion -->
+  <div class="section" id="sectionConclusion" style="display:none;">
+    <div class="section-header">
+      <div class="icon">&#128202;</div>
+      <h3>总体结论</h3>
+    </div>
+    <div class="tabs-container">
+      <div class="tabs-nav" id="tabsNavConclusion">
+        <button class="tab-btn active" data-tab="tabOverall">&#128202; 总体风险</button>
+        <button class="tab-btn" data-tab="tabAdvice">&#128203; 投资建议</button>
+      </div>
+
+      <!-- Tab: Overall Risk -->
+      <div class="tab-content active" id="tabOverall"></div>
+
+      <!-- Tab: Investment Advice -->
+      <div class="tab-content" id="tabAdvice"></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Toast Container -->
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     JavaScript
+     ═══════════════════════════════════════════════════════════════ -->
+<script>
+(function() {
+  'use strict';
+
+  // ── State ──
+  const state = {
+    selectedCode: '',
+    selectedName: '',
+    selectedIndustry: '',
+    basicInfo: null,
+    workpaper: null,
+    analysisResult: null,
+    searchTimer: null,
+  };
+
+  // ── DOM refs ──
+  const $ = (sel) => document.querySelector(sel);
+  const $$ = (sel) => document.querySelectorAll(sel);
+
+  const searchInput = $('#searchInput');
+  const searchDropdown = $('#searchDropdown');
+  const yearSelect = $('#yearSelect');
+  const btnAnalyze = $('#btnAnalyze');
+  const emptyState = $('#emptyState');
+  const progressPanel = $('#progressPanel');
+
+  // ── API Base ──
+  const API = 'http://localhost:5001';
+
+  // ── Toast ──
+  function showToast(msg, type) {
+    type = type || 'info';
+    const container = $('#toastContainer');
+    const toast = document.createElement('div');
+    toast.className = 'toast toast-' + type;
+    toast.textContent = msg;
+    container.appendChild(toast);
+    setTimeout(function() {
+      toast.classList.add('toast-out');
+      setTimeout(function() { toast.remove(); }, 300);
+    }, 4000);
+  }
+
+  // ── Helpers ──
+  function fmtVal(v, unit) {
+    if (v === null || v === undefined || v === 'N/A' || (typeof v === 'number' && isNaN(v))) return '<span class="na">N/A</span>';
+    if (typeof v === 'number') {
+      if (Math.abs(v) >= 100) return v.toFixed(2) + (unit || '');
+      if (Math.abs(v) >= 1) return v.toFixed(2) + (unit || '');
+      return v.toFixed(4) + (unit || '');
+    }
+    return v + (unit || '');
+  }
+
+  function riskLevelClass(level) {
+    if (!level) return '';
+    if (level === '低风险') return 'risk-low';
+    if (level === '中风险') return 'risk-medium';
+    if (level === '中高风险') return 'risk-medium-high';
+    if (level === '高风险') return 'risk-high';
+    return '';
+  }
+
+  function riskBadgeHTML(level, big) {
+    var cls = riskLevelClass(level);
+    var sizeCls = big ? 'risk-big ' : 'risk-badge ';
+    return '<span class="' + sizeCls + cls + '">' + (level || 'N/A') + '</span>';
+  }
+
+  function strengthClass(s) {
+    if (!s) return '';
+    if (s === '强' || s === '强辩护') return 'strength-strong';
+    if (s === '中' || s === '中等辩护') return 'strength-mid';
+    if (s === '弱' || s === '弱辩护') return 'strength-weak';
+    return 'strength-none';
+  }
+
+  function strengthBadgeHTML(s) {
+    return '<span class="strength-badge ' + strengthClass(s) + '">' + (s || 'N/A') + '</span>';
+  }
+
+  function priorityClass(p) {
+    if (p === '高') return 'priority-high';
+    if (p === '中') return 'priority-medium';
+    return 'priority-low';
+  }
+
+  function escHTML(str) {
+    if (!str) return '';
+    return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  function showSection(id) {
+    var el = document.getElementById(id);
+    if (el) {
+      el.style.display = '';
+      setTimeout(function() { el.classList.add('visible'); }, 50);
+    }
+  }
+
+  function setStepState(stepNum, status) {
+    var el = document.getElementById('step' + stepNum);
+    if (!el) return;
+    el.classList.remove('active', 'done');
+    if (status === 'active') {
+      el.classList.add('active');
+      var textEl = el.querySelector('.step-text');
+      if (stepNum === 2 || stepNum === 3 || stepNum === 4) {
+        textEl.innerHTML = textEl.textContent.replace('...', '') + '...<span class="spinner"></span>';
+      }
+    } else if (status === 'done') {
+      el.classList.add('done');
+      var iconEl = el.querySelector('.step-icon');
+      iconEl.innerHTML = '&#10003;';
+      var textEl = el.querySelector('.step-text');
+      textEl.innerHTML = textEl.textContent.replace('<span class="spinner"></span>', '') + ' &#10003;';
+    }
+  }
+
+  function resetSteps() {
+    for (var i = 1; i <= 4; i++) {
+      var el = document.getElementById('step' + i);
+      el.classList.remove('active', 'done');
+      el.querySelector('.step-icon').textContent = i;
+      var texts = ['生成工作底稿...', '指控智能体分析中...', '辩护智能体分析中...', '裁决智能体分析中...'];
+      el.querySelector('.step-text').textContent = texts[i - 1];
+    }
+  }
+
+  // ── Search ──
+  searchInput.addEventListener('input', function() {
+    var q = this.value.trim();
+    clearTimeout(state.searchTimer);
+    if (!q) {
+      searchDropdown.classList.remove('active');
+      searchDropdown.innerHTML = '';
+      return;
+    }
+    state.searchTimer = setTimeout(function() { doSearch(q); }, 300);
+  });
+
+  searchInput.addEventListener('focus', function() {
+    if (searchDropdown.children.length > 0) {
+      searchDropdown.classList.add('active');
+    }
+  });
+
+  document.addEventListener('click', function(e) {
+    if (!e.target.closest('.search-box')) {
+      searchDropdown.classList.remove('active');
+    }
+  });
+
+  async function doSearch(q) {
+    try {
+      var resp = await fetch(API + '/api/stock/search?q=' + encodeURIComponent(q));
+      if (!resp.ok) throw new Error('搜索失败');
+      var data = await resp.json();
+      renderDropdown(data);
+    } catch (e) {
+      console.error('Search error:', e);
+    }
+  }
+
+  function renderDropdown(items) {
+    searchDropdown.innerHTML = '';
+    if (!items || items.length === 0) {
+      searchDropdown.innerHTML = '<div class="dd-empty">未找到匹配的股票</div>';
+      searchDropdown.classList.add('active');
+      return;
+    }
+    // 按股票代码+公司名称去重
+    var seen = {};
+    var uniqueItems = [];
+    items.forEach(function(item) {
+      var key = item.stock_code + '|' + item.company_name;
+      if (!seen[key]) {
+        seen[key] = true;
+        uniqueItems.push(item);
+      }
+    });
+    uniqueItems.forEach(function(item) {
+      var div = document.createElement('div');
+      div.className = 'dd-item';
+      div.innerHTML =
+        '<span class="code">' + escHTML(item.stock_code) + '</span>' +
+        '<span class="name">' + escHTML(item.company_name) + '</span>' +
+        '<span class="industry">' + escHTML(item.industry_name || '') + '</span>';
+      div.addEventListener('click', function() {
+        selectStock(item);
+      });
+      searchDropdown.appendChild(div);
+    });
+    searchDropdown.classList.add('active');
+  }
+
+  async function selectStock(item) {
+    state.selectedCode = item.stock_code;
+    state.selectedName = item.company_name;
+    state.selectedIndustry = item.industry_name || '';
+    searchInput.value = item.company_name + ' (' + item.stock_code + ')';
+    searchDropdown.classList.remove('active');
+
+    // Load available years
+    yearSelect.innerHTML = '<option value="">加载中...</option>';
+    btnAnalyze.disabled = true;
+    try {
+      var resp = await fetch(API + '/api/stock/info?code=' + item.stock_code);
+      if (!resp.ok) throw new Error('获取年份失败');
+      var data = await resp.json();
+      yearSelect.innerHTML = '<option value="">选择年份</option>';
+      (data.available_years || []).forEach(function(y) {
+        var opt = document.createElement('option');
+        opt.value = y;
+        opt.textContent = y + ' 年';
+        yearSelect.appendChild(opt);
+      });
+      btnAnalyze.disabled = true;
+    } catch (e) {
+      showToast('获取年份列表失败: ' + e.message, 'error');
+      yearSelect.innerHTML = '<option value="">选择年份</option>';
+    }
+  }
+
+  yearSelect.addEventListener('change', function() {
+    btnAnalyze.disabled = !this.value;
+  });
+
+  // ── Analyze Button ──
+  btnAnalyze.addEventListener('click', function() {
+    if (!state.selectedCode || !yearSelect.value) return;
+    startAnalysis(state.selectedCode, parseInt(yearSelect.value));
+  });
+
+  async function startAnalysis(code, year) {
+    // Reset
+    emptyState.style.display = 'none';
+    $('#sectionBasicInfo').style.display = 'none';
+    $('#sectionBasicInfo').classList.remove('visible');
+    $('#sectionWorkpaper').style.display = 'none';
+    $('#sectionWorkpaper').classList.remove('visible');
+    $('#sectionAnalysis').style.display = 'none';
+    $('#sectionAnalysis').classList.remove('visible');
+    $('#sectionConclusion').style.display = 'none';
+    $('#sectionConclusion').classList.remove('visible');
+    progressPanel.classList.remove('active');
+    resetSteps();
+
+    btnAnalyze.disabled = true;
+    btnAnalyze.innerHTML = '<span class="spinner"></span> 分析中...';
+
+    try {
+      // Step 1: Load basic info + workpaper
+      progressPanel.classList.add('active');
+      setStepState(1, 'active');
+
+      var [basicResp, wpResp] = await Promise.all([
+        fetch(API + '/api/stock/basic_info?code=' + code + '&year=' + year, { signal: AbortSignal.timeout(30000) }),
+        fetch(API + '/api/workpaper?code=' + code + '&year=' + year, { signal: AbortSignal.timeout(120000) }),
+      ]);
+
+      if (!basicResp.ok) {
+        var errData = await basicResp.json().catch(function() { return {}; });
+        throw new Error(errData.error || '获取基本信息失败');
+      }
+      if (!wpResp.ok) {
+        var errData2 = await wpResp.json().catch(function() { return {}; });
+        throw new Error(errData2.error || '生成工作底稿失败');
+      }
+
+      state.basicInfo = await basicResp.json();
+      state.workpaper = await wpResp.json();
+
+      setStepState(1, 'done');
+
+      // Render basic info and workpaper
+      renderBasicInfo(state.basicInfo);
+      renderWorkpaper(state.workpaper);
+
+      // Step 2-4: Three-agent analysis
+      setStepState(2, 'active');
+
+      var analyzeResp = await fetch(API + '/api/analyze', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code: code, year: year }),
+        signal: AbortSignal.timeout(300000),
+      });
+
+      if (!analyzeResp.ok) {
+        var errData3 = await analyzeResp.json().catch(function() { return {}; });
+        throw new Error(errData3.error || '三智能体分析失败');
+      }
+
+      setStepState(2, 'done');
+      setStepState(3, 'active');
+
+      // The backend runs all three agents sequentially, so we simulate steps
+      // We already got the full result, but animate the steps
+      state.analysisResult = await analyzeResp.json();
+
+      await delay(800);
+      setStepState(3, 'done');
+      setStepState(4, 'active');
+
+      await delay(800);
+      setStepState(4, 'done');
+
+      // Render analysis results
+      renderAnalysis(state.analysisResult);
+
+      showToast('分析完成', 'success');
+
+    } catch (e) {
+      console.error('Analysis error:', e);
+      showToast('分析失败: ' + e.message, 'error');
+      progressPanel.classList.remove('active');
+    } finally {
+      btnAnalyze.disabled = false;
+      btnAnalyze.innerHTML = '<span>&#9654;</span> 开始分析';
+    }
+  }
+
+  function delay(ms) {
+    return new Promise(function(resolve) { setTimeout(resolve, ms); });
+  }
+
+  // ── Render Basic Info ──
+  function renderBasicInfo(info) {
+    // Company header
+    var headerHTML =
+      '<div class="company-header">' +
+        '<div class="info">' +
+          '<div>' +
+            '<div class="company-name">' + escHTML(info.company_name) + '</div>' +
+            '<div class="company-code">' + escHTML(info.stock_code) + ' | ' + escHTML(info.industry_name || '') + '</div>' +
+          '</div>' +
+        '</div>' +
+        '<div class="meta-tags">' +
+          '<span class="tag">' + escHTML(info.year || '') + ' 年报</span>' +
+          '<span class="tag">报告期 ' + escHTML(info.report_date || '') + '</span>' +
+        '</div>' +
+      '</div>';
+    $('#companyHeader').innerHTML = headerHTML;
+
+    // Category definitions
+    var categories = [
+      {
+        name: '规模指标', icon: '\ud83d\udcca',
+        metrics: [
+          { label: '总资产', value: info.total_assets, unit: ' 亿元' },
+          { label: '营业收入', value: info.total_revenue, unit: ' 亿元' },
+          { label: '净利润', value: info.net_profit, unit: ' 亿元' },
+          { label: '总负债', value: info.total_liabilities, unit: ' 亿元' },
+          { label: '净资产', value: info.owners_equity, unit: ' 亿元' },
+          { label: '经营现金流', value: info.operating_cash_flow, unit: ' 亿元' },
+        ]
+      },
+      {
+        name: '盈利能力', icon: '\ud83d\udcb9',
+        metrics: [
+          { label: '毛利率', value: info.gross_margin, unit: '%' },
+          { label: '净利率', value: info.net_profit_margin, unit: '%' },
+          { label: 'ROE', value: info.roe, unit: '%' },
+          { label: '每股收益', value: info.basic_eps, unit: '' },
+        ]
+      },
+      {
+        name: '营运能力', icon: '\u2699\ufe0f',
+        metrics: [
+          { label: '应收周转率', value: info.receivables_turnover, unit: '' },
+          { label: '存货周转率', value: info.inventory_turnover, unit: '' },
+          { label: '流动比率', value: info.current_ratio, unit: '' },
+        ]
+      },
+      {
+        name: '增长率', icon: '\ud83d\udcc8',
+        metrics: [
+          { label: '营收增长率', value: info.revenue_growth, unit: '%' },
+          { label: '应收增长率', value: info.receivable_growth, unit: '%' },
+          { label: '存货增长率', value: info.inventory_growth, unit: '%' },
+        ]
+      },
+      {
+        name: '现金流', icon: '\ud83d\udcb0',
+        metrics: [
+          { label: '经营现金流', value: info.ocf, unit: ' 亿元' },
+          { label: '投资现金流', value: info.investing_cf, unit: ' 亿元' },
+          { label: '筹资现金流', value: info.financing_cf, unit: ' 亿元' },
+        ]
+      },
+      {
+        name: '其他指标', icon: '\ud83d\udccb',
+        metrics: [
+          { label: '销售费用率', value: info.selling_expense_ratio, unit: '%' },
+          { label: '利息负债率', value: info.interest_liab_ratio, unit: '%' },
+          { label: '客户集中度', value: info.customer_concentration, unit: '%' },
+          { label: '供应商集中度', value: info.supplier_concentration, unit: '%' },
+          { label: '关联交易金额', value: info.related_party_amount, unit: '' },
+          { label: '审计意见', value: info.audit_opinion, unit: '' },
+        ]
+      }
+    ];
+
+    // Render category tabs
+    var tabsHTML = '';
+    categories.forEach(function(cat, idx) {
+      tabsHTML +=
+        '<button class="cat-tab' + (idx === 0 ? ' active' : '') + '" data-cat="' + idx + '">' +
+          cat.icon + ' ' + escHTML(cat.name) +
+        '</button>';
+    });
+    $('#catTabs').innerHTML = tabsHTML;
+
+    // Render metric grids per category
+    var metricsHTML = '';
+    categories.forEach(function(cat, idx) {
+      var gridId = 'catGrid' + idx;
+      metricsHTML += '<div class="cat-metric-grid' + (idx === 0 ? ' active' : '') + '" id="' + gridId + '"></div>';
+    });
+    $('#catMetrics').innerHTML = metricsHTML;
+
+    // Fill each grid with metrics
+    categories.forEach(function(cat, idx) {
+      var gridHTML = '';
+      cat.metrics.forEach(function(m) {
+        var valStr = fmtVal(m.value, m.unit);
+        var naCls = (m.value === null || m.value === undefined || m.value === 'N/A') ? ' na' : '';
+        gridHTML +=
+          '<div class="metric-card">' +
+            '<div class="label">' + escHTML(m.label) + '</div>' +
+            '<div class="value' + naCls + '">' + valStr + '</div>' +
+          '</div>';
+      });
+      $('#catGrid' + idx).innerHTML = gridHTML;
+    });
+
+    // ── Category switching ──
+    document.getElementById('catTabs').addEventListener('click', function(e) {
+      var btn = e.target.closest('.cat-tab');
+      if (!btn) return;
+      var idx = btn.getAttribute('data-cat');
+
+      // Update tab active state
+      $$('#catTabs .cat-tab').forEach(function(b) { b.classList.remove('active'); });
+      btn.classList.add('active');
+
+      // Update grid active state
+      $$('#catMetrics .cat-metric-grid').forEach(function(g) { g.classList.remove('active'); });
+      var target = document.getElementById('catGrid' + idx);
+      if (target) target.classList.add('active');
+    });
+
+    showSection('sectionBasicInfo');
+  }
+
+  // ── Render Workpaper ──
+  function renderWorkpaper(wp) {
+    var html = '';
+    var rs = wp.risk_summary || {};
+    var mlScore = rs.ml_score;
+    var mlLevel = rs.overall_risk_level_ml || 'N/A';
+
+    // Card 1: ML Score
+    var scoreColor = riskLevelColor(mlLevel);
+    html +=
+      '<div class="wp-card wp-card-col-2">' +
+        '<h4>ML 模型评分</h4>' +
+        '<div class="ml-score-display">' +
+          '<div class="score-value" style="color:' + scoreColor + '">' + (mlScore !== null && mlScore !== undefined ? mlScore : 'N/A') + '</div>' +
+          '<div class="score-label">风险得分（满分100）</div>' +
+          riskBadgeHTML(mlLevel) +
+        '</div>' +
+        '<div style="margin-top:16px;font-size:13px;color:var(--text-muted);">' +
+          '<div>命中规则: ' + (rs.hit_count || 0) + ' / ' + (rs.total_rules || 17) + ' 条</div>' +
+          '<div>规则得分: ' + (rs.total_hit_score || 0) + ' / ' + (rs.max_possible_score || 0) + ' 分</div>' +
+          '<div>得分比率: ' + (rs.score_ratio || 0) + '%</div>' +
+        '</div>' +
+      '</div>';
+
+    // Card 2: Rule Stats
+    var bw = rs.by_weight || {};
+    html +=
+      '<div class="wp-card wp-card-col-2">' +
+        '<h4>规则命中统计</h4>' +
+        '<div class="rule-stats">' +
+          '<div><div class="big-num">' + (rs.hit_count || 0) + '</div><div class="big-label">命中 / ' + (rs.total_rules || 17) + ' 总规则</div></div>' +
+        '</div>' +
+        '<div class="weight-bars">' +
+          '<div class="weight-bar-item"><div class="bar" style="background:var(--danger)"></div><div class="count">' + (bw['高'] || 0) + '</div><div class="lbl">高权重</div></div>' +
+          '<div class="weight-bar-item"><div class="bar" style="background:var(--warning)"></div><div class="count">' + (bw['中'] || 0) + '</div><div class="lbl">中权重</div></div>' +
+          '<div class="weight-bar-item"><div class="bar" style="background:var(--success)"></div><div class="count">' + (bw['低'] || 0) + '</div><div class="lbl">低权重</div></div>' +
+        '</div>' +
+      '</div>';
+
+    // Card 3: Category breakdown with highlight
+    var bc = rs.by_category || {};
+    html += '<div class="wp-card wp-card-col-2"><h4>三类风险命中情况</h4><div class="category-list">';
+    ['收入舞弊', '存货异常', '资金异常'].forEach(function(cat) {
+      var c = bc[cat] || {};
+      var hitCount = c.hit_count || 0;
+      var rules = c.rules || [];
+      var rulesStr = rules.map(function(r) { return r.code; }).join(', ') || '无';
+      var hasHit = hitCount > 0;
+      html +=
+        '<div class="category-item' + (hasHit ? ' hit' : ' no-hit') + '">' +
+          '<div><div class="cat-name">' + escHTML(cat) + '</div>' +
+          '<div class="text-xs text-muted" style="margin-top:2px;">' + escHTML(rulesStr) + '</div></div>' +
+          '<div class="cat-count">' + (hasHit ? '⚠ ' : '') + hitCount + ' 条命中</div>' +
+        '</div>';
+    });
+    html += '</div></div>';
+
+    // Card 4: Fraud Triangle with detailed signals and theory explanation
+    var ft = wp.fraud_triangle_analysis || {};
+    html +=
+      '<div class="wp-card wp-card-col-3">' +
+        '<h4>舞弊三角分析</h4>' +
+        '<div class="triangle-grid">';
+    ['pressure', 'opportunity', 'rationalization'].forEach(function(dim) {
+      var d = ft[dim] || {};
+      var level = d.assessment || '低';
+      var signals = d.signals || [];
+      var desc = d.description || '';
+      var lc = level === '高' ? 'var(--danger)' : (level === '中' ? 'var(--warning)' : 'var(--success)');
+      var levelCls = level === '高' ? 'level-high' : (level === '中' ? 'level-medium' : 'level-low');
+      var labelMap = { pressure: '压力', opportunity: '机会', rationalization: '合理化' };
+      html +=
+        '<div class="triangle-item ' + levelCls + '">' +
+          '<div class="t-label">' + (labelMap[dim] || dim) + '</div>' +
+          '<div class="t-level" style="color:' + lc + '">' + level + '</div>' +
+          '<div class="t-desc">' + escHTML(desc) + '</div>';
+      if (signals.length > 0) {
+        signals.forEach(function(s) {
+          html += '<div class="t-signal-item">' + '• ' + escHTML(s) + '</div>';
+        });
+      } else {
+        html += '<div class="t-signal-item" style="color:var(--text-muted);border:none;">暂无信号</div>';
+      }
+      html += '</div>';
+    });
+    // Fraud triangle theory explanation
+    html +=
+      '<div class="triangle-theory-note">' +
+        '<strong>💡 舞弊三角理论简述：</strong>' +
+        '该理论认为企业舞弊行为的产生需要同时具备三个条件：' +
+        '<b>压力</b>（业绩/资金压力驱使管理层铤而走险）、' +
+        '<b>机会</b>（内控漏洞/治理缺陷为舞弊提供可乘之机）、' +
+        '<b>合理化</b>（管理层能为舞弊行为找到自我说服的借口）。' +
+        '三个维度中，出现信号的维度越多、信号越强烈，舞弊风险越高。' +
+        '如果某一维度被判定为"高"（红色），需要重点关注。' +
+      '</div></div></div>';
+
+    // Card 5: Peer Comparison
+    var pc = wp.peer_comparison || {};
+    html += '<div class="wp-card wp-card-col-3"><h4>同业对比</h4>';
+    if (pc.gross_margin) {
+      html += '<div style="margin-bottom:12px;">' +
+        '<div class="text-xs text-muted">毛利率</div>' +
+        '<div class="text-sm">公司: ' + fmtPct(pc.gross_margin.company_pct) + ' | 行业: ' + fmtPct(pc.gross_margin.industry_avg_pct) + ' | 偏差: ' + fmtPct(pc.gross_margin.deviation_pct) + '</div>' +
+        '<div class="text-xs" style="color:' + (pc.gross_margin.assessment && pc.gross_margin.assessment.indexOf('高于') > -1 ? 'var(--warning)' : 'var(--text-muted)') + '">' + escHTML(pc.gross_margin.assessment || '') + '</div>' +
+      '</div>';
+    }
+    if (pc.inventory_turnover) {
+      html += '<div style="margin-bottom:12px;">' +
+        '<div class="text-xs text-muted">存货周转率</div>' +
+        '<div class="text-sm">公司: ' + fmtNum(pc.inventory_turnover.company) + ' | 行业: ' + fmtNum(pc.inventory_turnover.industry_avg) + '</div>' +
+        '<div class="text-xs" style="color:' + (pc.inventory_turnover.assessment && pc.inventory_turnover.assessment.indexOf('低于') > -1 ? 'var(--warning)' : 'var(--text-muted)') + '">' + escHTML(pc.inventory_turnover.assessment || '') + '</div>' +
+      '</div>';
+    }
+    if (pc.revenue_growth) {
+      html += '<div>' +
+        '<div class="text-xs text-muted">营收增长率</div>' +
+        '<div class="text-sm">公司: ' + fmtPct(pc.revenue_growth.company_pct) + ' | 行业: ' + fmtPct(pc.revenue_growth.industry_avg_pct) + '</div>' +
+      '</div>';
+    }
+    html += '</div>';
+
+    $('#wpOverview').innerHTML = html;
+    showSection('sectionWorkpaper');
+  }
+
+  function riskLevelColor(level) {
+    if (level === '低风险') return 'var(--success)';
+    if (level === '中风险') return 'var(--warning)';
+    if (level === '中高风险') return 'var(--orange)';
+    if (level === '高风险') return 'var(--danger)';
+    return 'var(--text-muted)';
+  }
+
+  function fmtPct(v) {
+    if (v === null || v === undefined) return 'N/A';
+    return (v * 100).toFixed(2) + '%';
+  }
+
+  function fmtNum(v) {
+    if (v === null || v === undefined) return 'N/A';
+    if (typeof v === 'number') return v.toFixed(4);
+    return v;
+  }
+
+  // ── Render Analysis ──
+  function renderAnalysis(result) {
+    if (!result || !result.success) {
+      showToast('分析结果异常', 'error');
+      return;
+    }
+
+    var pros = result.prosecution || {};
+    var defe = result.defense || {};
+    var verd = result.verdict || {};
+    var ml = result.ml_reference || {};
+
+    renderTabProsecution(pros);
+    renderTabDefense(defe, pros);
+    renderTabVerdict(verd);
+    renderTabOverall(verd, ml, pros);
+    renderTabAdvice(verd, pros, defe);
+
+    showSection('sectionAnalysis');
+    showSection('sectionConclusion');
+  }
+
+  // Tab 1: Overall Risk
+  function renderTabOverall(verd, ml, pros) {
+    var html = '';
+
+    // Final risk level - big display
+    html += '<div style="text-align:center;margin-bottom:24px;">';
+    html += '<div class="text-sm text-muted mb-2">最终风险等级</div>';
+    html += riskBadgeHTML(verd.final_risk_level, true);
+    html += '</div>';
+
+    // Grid
+    html += '<div class="overall-risk-grid">';
+    html += '<div class="overall-risk-item"><div class="or-label">利润舞弊风险等级</div><div class="or-value">' + riskBadgeHTML(verd.profit_fraud_risk_level) + '</div></div>';
+    html += '<div class="overall-risk-item"><div class="or-label">资产舞弊风险等级</div><div class="or-value">' + riskBadgeHTML(verd.asset_fraud_risk_level) + '</div></div>';
+    html += '<div class="overall-risk-item"><div class="or-label">主要风险类型</div><div class="or-value">' + escHTML(verd.main_risk_type || 'N/A') + '</div></div>';
+    html += '<div class="overall-risk-item"><div class="or-label">ML参考得分</div><div class="or-value">' + (ml.ml_score !== null && ml.ml_score !== undefined ? ml.ml_score + ' 分' : 'N/A') + ' ' + riskBadgeHTML(ml.overall_risk_level_ml) + '</div></div>';
+    html += '</div>';
+
+    // Verdict summary
+    if (verd.verdict_summary) {
+      html += '<div class="summary-text">' + escHTML(verd.verdict_summary) + '</div>';
+    }
+
+    $('#tabOverall').innerHTML = html;
+  }
+
+  // Tab 2: Prosecution
+  function renderTabProsecution(pros) {
+    var html = '';
+    var pf = pros.profit_fraud || {};
+    var af = pros.asset_fraud || {};
+
+    // Profit fraud
+    html += '<div class="result-card">';
+    html += '<div class="rc-header">';
+    html += '<span style="font-size:15px;font-weight:600;">利润舞弊风险</span>';
+    html += riskBadgeHTML(pf.risk_level);
+    html += '<span class="text-sm text-muted">置信度: ' + escHTML(pf.confidence || 'N/A') + '</span>';
+    html += '</div>';
+    if (pf.main_accusations && pf.main_accusations.length > 0) {
+      pf.main_accusations.forEach(function(acc) {
+        html += renderAccusationCard(acc);
+      });
+    } else {
+      html += '<div class="text-sm text-muted">未发现主要指控点</div>';
+    }
+    html += '</div>';
+
+    // Asset fraud
+    html += '<div class="result-card">';
+    html += '<div class="rc-header">';
+    html += '<span style="font-size:15px;font-weight:600;">资产舞弊风险</span>';
+    html += riskBadgeHTML(af.risk_level);
+    html += '<span class="text-sm text-muted">置信度: ' + escHTML(af.confidence || 'N/A') + '</span>';
+    html += '</div>';
+    if (af.main_accusations && af.main_accusations.length > 0) {
+      af.main_accusations.forEach(function(acc) {
+        html += renderAccusationCard(acc);
+      });
+    } else {
+      html += '<div class="text-sm text-muted">未发现主要指控点</div>';
+    }
+    html += '</div>';
+
+    // Attention items
+    var attn = pros.attention_items || [];
+    if (attn.length > 0) {
+      html += '<div class="advice-section"><h4>&#128065; 关注事项</h4><ul>';
+      attn.forEach(function(item) {
+        html += '<li>' + escHTML(typeof item === 'string' ? item : JSON.stringify(item)) + '</li>';
+      });
+      html += '</ul></div>';
+    }
+
+    // Data limitations
+    var dlim = pros.data_limitations || [];
+    if (dlim.length > 0) {
+      html += '<div class="advice-section"><h4>&#9888;&#65039; 数据局限</h4><ul>';
+      dlim.forEach(function(item) {
+        html += '<li>' + escHTML(typeof item === 'string' ? item : JSON.stringify(item)) + '</li>';
+      });
+      html += '</ul></div>';
+    }
+
+    $('#tabProsecution').innerHTML = html;
+  }
+
+  function renderAccusationCard(acc) {
+    var html = '<div style="padding:14px;margin:10px 0;background:rgba(15,23,42,0.4);border-radius:8px;border:1px solid var(--border);">';
+    html += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap;">';
+    html += '<span class="rc-id">' + escHTML(acc.accusation_id || '') + '</span>';
+    html += '<span style="font-size:14px;font-weight:600;flex:1;">' + escHTML(acc.risk_point || '') + '</span>';
+    html += strengthBadgeHTML(acc.strength);
+    html += '</div>';
+
+    if (acc.related_rules && acc.related_rules.length > 0) {
+      html += '<p><span class="field-label">相关规则:</span>';
+      acc.related_rules.forEach(function(r) { html += '<span class="evidence-tag">' + escHTML(r) + '</span>'; });
+      html += '</p>';
+    }
+    if (acc.related_indicators && acc.related_indicators.length > 0) {
+      html += '<p><span class="field-label">相关指标:</span>';
+      acc.related_indicators.forEach(function(r) { html += '<span class="evidence-tag">' + escHTML(r) + '</span>'; });
+      html += '</p>';
+    }
+    if (acc.evidence) {
+      html += '<p><span class="field-label">证据:</span>' + escHTML(acc.evidence) + '</p>';
+    }
+    if (acc.fraud_meaning) {
+      html += '<p><span class="field-label">舞弊含义:</span><span style="color:var(--warning);">' + escHTML(acc.fraud_meaning) + '</span></p>';
+    }
+    html += '</div>';
+    return html;
+  }
+
+  // Tab 3: Defense
+  function renderTabDefense(defe, pros) {
+    var html = '';
+    var results = defe.defense_results || [];
+
+    if (results.length === 0) {
+      html += '<div class="text-sm text-muted" style="text-align:center;padding:40px;">无辩护条目</div>';
+    } else {
+      results.forEach(function(dr) {
+        html += '<div class="result-card">';
+        html += '<div class="rc-header">';
+        html += '<span class="rc-id">' + escHTML(dr.target_accusation_id || '') + '</span>';
+        html += '<span class="rc-title">' + escHTML(dr.original_risk_point || '') + '</span>';
+        html += strengthBadgeHTML(dr.defense_strength);
+        html += '</div>';
+
+        // Adjustment suggestion
+        if (dr.suggested_adjustment) {
+          html += '<p class="text-sm mb-2"><span class="field-label">调整建议:</span>' + escHTML(dr.suggested_adjustment) + '</p>';
+        }
+
+        // Defense reasons
+        var reasons = dr.defense_reasons || [];
+        reasons.forEach(function(r) {
+          var evAvailable = r.evidence_available;
+          html += '<div class="defense-reason">';
+          html += '<div class="dr-type">' + escHTML(r.reason_type || '') + '</div>';
+          html += '<div class="dr-text">' + escHTML(r.reason || '') + '</div>';
+          if (r.supporting_evidence) {
+            html += '<div class="dr-evidence ' + (evAvailable ? 'has-ev' : 'no-ev') + '">';
+            html += (evAvailable ? '&#10003; 有证据: ' : '&#10007; 无底稿证据: ');
+            html += escHTML(r.supporting_evidence) + '</div>';
+          }
+          html += '</div>';
+        });
+
+        // Remaining concerns
+        var concerns = dr.remaining_concerns || [];
+        if (concerns.length > 0) {
+          html += '<div class="mt-2"><span class="field-label">仍存疑点:</span>';
+          concerns.forEach(function(c) {
+            html += '<span class="text-sm" style="color:var(--warning);margin-right:8px;">' + escHTML(typeof c === 'string' ? c : JSON.stringify(c)) + '</span>';
+          });
+          html += '</div>';
+        }
+
+        // Defense summary
+        if (dr.defense_summary) {
+          html += '<div class="divider"></div>';
+          html += '<p class="text-sm text-muted"><span class="field-label">辩护总结:</span>' + escHTML(dr.defense_summary) + '</p>';
+        }
+
+        html += '</div>';
+      });
+    }
+
+    // Overall defense
+    var od = defe.overall_defense || {};
+    if (od.main_defense_points || od.unresolved_risks) {
+      html += '<div class="summary-text">';
+      if (od.main_defense_points && od.main_defense_points.length > 0) {
+        html += '<div class="fw-bold mb-2">主要辩护论点:</div>';
+        od.main_defense_points.forEach(function(pt) {
+          html += '<div class="text-sm mb-2">- ' + escHTML(typeof pt === 'string' ? pt : JSON.stringify(pt)) + '</div>';
+        });
+      }
+      if (od.unresolved_risks && od.unresolved_risks.length > 0) {
+        html += '<div class="divider"></div>';
+        html += '<div class="fw-bold mb-2" style="color:var(--warning);">未化解风险:</div>';
+        od.unresolved_risks.forEach(function(ur) {
+          html += '<div class="text-sm mb-2" style="color:var(--warning);">- ' + escHTML(typeof ur === 'string' ? ur : JSON.stringify(ur)) + '</div>';
+        });
+      }
+      html += '</div>';
+    }
+
+    $('#tabDefense').innerHTML = html;
+  }
+
+  // Tab 4: Verdict
+  function renderTabVerdict(verd) {
+    var html = '';
+
+    // Final risk level
+    html += '<div style="text-align:center;margin-bottom:24px;">';
+    html += '<div class="text-sm text-muted mb-2">裁决结果 - 最终风险等级</div>';
+    html += riskBadgeHTML(verd.final_risk_level, true);
+    html += '</div>';
+
+    // Confirmed risks
+    var confirmed = verd.confirmed_risks || [];
+    if (confirmed.length > 0) {
+      html += '<h4 style="margin-bottom:12px;color:var(--success);">&#10003; 采纳风险点 (' + confirmed.length + ')</h4>';
+      confirmed.forEach(function(cr) {
+        html += '<div class="verdict-item confirmed">';
+        html += '<div class="vi-icon" style="color:var(--success);">&#10003;</div>';
+        html += '<div class="vi-content">';
+        html += '<div class="vi-type text-success">' + escHTML(cr.risk_type || '') + '</div>';
+        html += '<div class="vi-text">' + escHTML(cr.risk_point || '') + '</div>';
+        if (cr.basis) html += '<div class="vi-reason">依据: ' + escHTML(cr.basis) + '</div>';
+        if (cr.accepted_reason) html += '<div class="vi-reason">采纳原因: ' + escHTML(cr.accepted_reason) + '</div>';
+        html += '</div></div>';
+      });
+    }
+
+    // Rejected risks
+    var rejected = verd.rejected_risks || [];
+    if (rejected.length > 0) {
+      html += '<h4 style="margin:20px 0 12px;color:var(--danger);">&#10007; 驳回风险点 (' + rejected.length + ')</h4>';
+      rejected.forEach(function(rr) {
+        html += '<div class="verdict-item rejected">';
+        html += '<div class="vi-icon" style="color:var(--danger);">&#10007;</div>';
+        html += '<div class="vi-content">';
+        html += '<div class="vi-type text-danger">' + escHTML(rr.risk_type || '') + '</div>';
+        html += '<div class="vi-text">' + escHTML(rr.risk_point || '') + '</div>';
+        if (rr.rejected_reason) html += '<div class="vi-reason">驳回原因: ' + escHTML(rr.rejected_reason) + '</div>';
+        html += '</div></div>';
+      });
+    }
+
+    // Watchlist
+    var watchlist = verd.watchlist_items || [];
+    if (watchlist.length > 0) {
+      html += '<h4 style="margin:20px 0 12px;color:var(--warning);">&#128308; 保留关注 (' + watchlist.length + ')</h4>';
+      watchlist.forEach(function(wi) {
+        html += '<div class="verdict-item watchlist">';
+        html += '<div class="vi-icon" style="color:var(--warning);">&#128308;</div>';
+        html += '<div class="vi-content">';
+        html += '<div class="vi-type text-warning">' + escHTML(wi.risk_type || '') + '</div>';
+        html += '<div class="vi-text">' + escHTML(wi.reason || '') + '</div>';
+        if (wi.required_additional_data) html += '<div class="vi-reason">需补充数据: ' + escHTML(wi.required_additional_data) + '</div>';
+        html += '</div></div>';
+      });
+    }
+
+    // Evidence chain
+    var evChain = verd.evidence_chain || [];
+    if (evChain.length > 0) {
+      html += '<h4 style="margin:24px 0 12px;">&#128279; 核心证据链</h4>';
+      evChain.forEach(function(ev) {
+        html += '<div class="evidence-chain-item">';
+        html += '<div class="ec-header">';
+        html += '<span class="text-sm fw-bold">' + escHTML(ev.risk_type || '') + '</span>';
+        html += strengthBadgeHTML(ev.strength);
+        html += '</div>';
+        html += '<div class="ec-summary">' + escHTML(ev.evidence_summary || '') + '</div>';
+        var rules = ev.related_rules || [];
+        var indic = ev.related_indicators || [];
+        if (rules.length > 0) {
+          html += '<div class="ec-rules">规则: ' + rules.map(function(r) { return '<span class="evidence-tag">' + escHTML(r) + '</span>'; }).join('') + '</div>';
+        }
+        if (indic.length > 0) {
+          html += '<div class="ec-rules">指标: ' + indic.map(function(r) { return '<span class="evidence-tag">' + escHTML(r) + '</span>'; }).join('') + '</div>';
+        }
+        html += '</div>';
+      });
+    }
+
+    // Minority opinions
+    var minority = verd.minority_opinions || [];
+    if (minority.length > 0) {
+      html += '<div class="advice-section mt-4"><h4>&#9888;&#65039; 少数意见</h4><ul>';
+      minority.forEach(function(m) {
+        html += '<li>' + escHTML(typeof m === 'string' ? m : JSON.stringify(m)) + '</li>';
+      });
+      html += '</ul></div>';
+    }
+
+    // Audit suggestions
+    var suggestions = verd.audit_suggestions || [];
+    if (suggestions.length > 0) {
+      html += '<div class="advice-section mt-4"><h4>&#128221; 核查建议</h4><ul>';
+      suggestions.forEach(function(sg) {
+        var priCls = priorityClass(sg.priority);
+        html += '<li><span class="risk-badge ' + priCls + '" style="margin-right:8px;">' + escHTML(sg.priority || '') + '</span>' + escHTML(sg.suggestion || '') + ' <span class="text-xs text-muted">(' + escHTML(sg.risk_type || '') + ')</span></li>';
+      });
+      html += '</ul></div>';
+    }
+
+    // Verdict summary
+    if (verd.verdict_summary) {
+      html += '<div class="summary-text mt-4">' + escHTML(verd.verdict_summary) + '</div>';
+    }
+
+    $('#tabVerdict').innerHTML = html;
+  }
+
+  // Tab 5: Investment Advice
+  function renderTabAdvice(verd, pros, defe) {
+    var html = '';
+
+    // Overall investment advice based on verdict
+    var level = verd.final_risk_level || 'N/A';
+    var mainType = verd.main_risk_type || 'N/A';
+    var confirmed = (verd.confirmed_risks || []).length;
+    var rejected = (verd.rejected_risks || []).length;
+    var watchlist = (verd.watchlist_items || []).length;
+
+    // Generate advice based on risk level
+    var adviceText = '';
+    var riskColor = riskLevelColor(level);
+    if (level === '低风险') {
+      adviceText = '该公司的财务数据未发现明显舞弊风险信号，ML模型评分处于低风险区间，三智能体分析未发现需要重点关注的风险点。整体财务状况相对健康，可作为常规投资标的进行跟踪观察。';
+    } else if (level === '中风险') {
+      adviceText = '该公司的财务数据存在一定异常信号，ML模型评分处于中风险区间。三智能体分析发现了部分值得关注的风险点，但辩护智能体提供了一定程度的合理解释。建议保持谨慎态度，密切关注相关财务指标的变化趋势。';
+    } else if (level === '中高风险') {
+      adviceText = '该公司的财务数据存在较为明显的异常信号，ML模型评分处于中高风险区间。三智能体分析发现了多个需要关注的风险点，部分指控未能被有效辩护。建议降低仓位或回避，等待风险信号明确改善后再做决策。';
+    } else if (level === '高风险') {
+      adviceText = '该公司的财务数据存在严重异常信号，ML模型评分处于高风险区间。三智能体分析发现了多项高风险指控且辩护未能有效化解。强烈建议回避该标的，已持仓投资者应考虑减仓或清仓，优先保护本金安全。';
+    } else {
+      adviceText = '分析结果不完整，无法给出明确的投资建议。建议等待完整分析结果或进行人工复核。';
+    }
+
+    html += '<div class="advice-section">';
+    html += '<h4>&#128176; 综合投资建议</h4>';
+    html += '<div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">';
+    html += '<span style="font-size:14px;color:var(--text-muted);">风险等级:</span>';
+    html += riskBadgeHTML(level);
+    html += '</div>';
+    html += '<p style="font-size:15px;line-height:1.8;color:var(--text-primary);">' + escHTML(adviceText) + '</p>';
+    html += '</div>';
+
+    // Risk warnings
+    html += '<div class="advice-section">';
+    html += '<h4>&#9888;&#65039; 风险提示</h4><ul>';
+    if (confirmed > 0) {
+      html += '<li>裁决智能体采纳了 <strong>' + confirmed + '</strong> 个风险点，这些风险点有充分的证据支持且辩护未能有效化解</li>';
+    }
+    if (watchlist > 0) {
+      html += '<li>有 <strong>' + watchlist + '</strong> 个风险点被列入保留关注，需要进一步核查确认</li>';
+    }
+    if (mainType !== '未发现明显风险') {
+      html += '<li>主要风险类型为 <strong>' + escHTML(mainType) + '</strong>，建议重点关注相关财务科目的变化</li>';
+    }
+    // Add minority opinions as risk
+    var minority = verd.minority_opinions || [];
+    if (minority.length > 0) {
+      html += '<li>裁决过程中存在 <strong>' + minority.length + '</strong> 条少数意见，表明部分风险尚存争议</li>';
+    }
+    html += '</ul></div>';
+
+    // Key indicators to watch
+    html += '<div class="advice-section">';
+    html += '<h4>&#128200; 建议关注的关键指标</h4><ul>';
+    var confirmedRisks = verd.confirmed_risks || [];
+    var watchlistRisks = verd.watchlist_items || [];
+    var indicatorSet = {};
+    confirmedRisks.concat(watchlistRisks).forEach(function(r) {
+      var type = r.risk_type || '';
+      if (!indicatorSet[type]) {
+        indicatorSet[type] = true;
+        if (type === '利润舞弊') {
+          html += '<li>收入确认政策、应收账款账龄与回款情况、毛利率变动趋势、经营现金流与净利润的匹配度</li>';
+        } else if (type === '资产舞弊') {
+          html += '<li>存货周转率与库龄结构、在建工程转固进度、预付款项对象与合理性、资产减值准备充分性</li>';
+        }
+      }
+    });
+    // Default indicators
+    html += '<li>审计意见类型及审计师变更情况</li>';
+    html += '<li>关联交易规模与公允性</li>';
+    html += '<li>控股股东质押比例变化</li>';
+    html += '</ul></div>';
+
+    // Suggested verification actions
+    var suggestions = verd.audit_suggestions || [];
+    if (suggestions.length > 0) {
+      html += '<div class="advice-section">';
+      html += '<h4>&#128270; 建议的核查行动</h4><ul>';
+      // Sort by priority
+      var sorted = suggestions.slice().sort(function(a, b) {
+        var order = { '高': 0, '中': 1, '低': 2 };
+        return (order[a.priority] || 2) - (order[b.priority] || 2);
+      });
+      sorted.forEach(function(sg) {
+        var priCls = priorityClass(sg.priority);
+        html += '<li><span class="risk-badge ' + priCls + '" style="margin-right:8px;">' + escHTML(sg.priority || '') + '优先</span>' + escHTML(sg.suggestion || '') + '</li>';
+      });
+      html += '</ul></div>';
+    }
+
+    // Disclaimer
+    html += '<div style="margin-top:24px;padding:16px;background:rgba(100,116,139,0.1);border:1px solid rgba(100,116,139,0.2);border-radius:8px;">';
+    html += '<p class="text-xs text-muted" style="line-height:1.6;">免责声明：本系统分析结果仅供参考，不构成任何投资建议。投资决策应基于全面的研究和专业的投资顾问意见。系统基于公开财务数据和算法模型进行分析，可能存在数据滞后、模型偏差等局限性。</p>';
+    html += '</div>';
+
+    $('#tabAdvice').innerHTML = html;
+  }
+
+  // ── Tab Switching (scoped to parent .tabs-container) ──
+  document.addEventListener('click', function(e) {
+    var btn = e.target.closest('.tab-btn');
+    if (!btn) return;
+    var tabId = btn.getAttribute('data-tab');
+    if (!tabId) return;
+
+    // Only toggle tabs within the same container
+    var container = btn.closest('.tabs-container');
+    if (container) {
+      container.querySelectorAll('.tab-btn').forEach(function(b) { b.classList.remove('active'); });
+      container.querySelectorAll('.tab-content').forEach(function(c) { c.classList.remove('active'); });
+    }
+    btn.classList.add('active');
+    var tabEl = document.getElementById(tabId);
+    if (tabEl) tabEl.classList.add('active');
+  });
+
+  // ── Keyboard shortcut ──
+  searchInput.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') {
+      var firstItem = searchDropdown.querySelector('.dd-item');
+      if (firstItem) {
+        firstItem.click();
+      }
+    }
+  });
+
+  // ── Check API status ──
+  fetch(API + '/api/stock/search?q=' + encodeURIComponent('测试'), { signal: AbortSignal.timeout(3000) })
+    .then(function(resp) {
+      if (resp.ok) {
+        $('#apiStatus').textContent = 'API 已连接';
+      } else {
+        $('#apiStatus').textContent = 'API 异常';
+      }
+    })
+    .catch(function() {
+      $('#apiStatus').textContent = 'API 未连接';
+      showToast('无法连接到后端API (localhost:5001)，请确保Flask服务已启动', 'error');
+    });
+
+})();
+</script>
+</body>
+</html>
