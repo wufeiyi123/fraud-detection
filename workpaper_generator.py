@@ -90,8 +90,7 @@ ROOT = Path(__file__).resolve().parent
 DATA_PATH = ROOT / "汇总数据.csv"
 
 # ── 最终版模型和配置文件输出目录（需提前运行 final_all_2007_2023_rule_modeling.py 生成）──
-FINAL_OUT_DIR = ROOT / "outputs_time_split" / "final_all_2007_2023_non_financial_fraud_type"
-
+FINAL_OUT_DIR = ROOT
 # 模型推理所需的核心文件
 MODEL_PATH = FINAL_OUT_DIR / "final_rf_rus_1to3_model_2007_2023.pkl"
 FEATURE_COLS_PATH = FINAL_OUT_DIR / "final_feature_columns.json"
