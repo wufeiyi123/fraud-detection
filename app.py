@@ -235,8 +235,9 @@ def full_analysis():
 
     except Exception as e:
         import traceback
-        traceback.print_exc()
-        return jsonify({"error": f"分析失败: {str(e)}"}), 500
+        sys.stderr.write(traceback.format_exc())
+        sys.stderr.flush()
+        return jsonify({"error": f"底稿生成失败: {str(e)}"}), 500
 
 
 if __name__ == '__main__':
